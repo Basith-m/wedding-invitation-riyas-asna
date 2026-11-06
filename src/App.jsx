@@ -38,7 +38,7 @@ export default function App() {
       <div className="pattern-overlay" aria-hidden="true" />
 
       {/* Background Audio with Floating Controls */}
-      <AudioPlayer audioSrc="/assets/audio/invitation_audio1.mpeg" isInvitationStarted={isStarted} />
+      <AudioPlayer audioSrc="/assets/audio/Slepless.mp3" isInvitationStarted={isStarted} />
 
       {/* Opening 3D Door & Couple Reveal Hero Section */}
       <HeroSection
