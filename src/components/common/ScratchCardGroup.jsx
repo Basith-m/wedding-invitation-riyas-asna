@@ -21,7 +21,7 @@ function ScratchCard({ value, label, isMonth = false }) {
     ctx.beginPath();
     ctx.arc(w / 2, h / 2, w / 2, 0, Math.PI * 2);
     ctx.clip();
-    ctx.fillStyle = '#40563A';
+    ctx.fillStyle = '#72141F';
     ctx.fillRect(0, 0, w, h);
     ctx.restore();
 

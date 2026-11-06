@@ -37,9 +37,9 @@ export const invitationData = {
     hijriDate: "6 Jumada al-Akhira 1448 AH",
     events: [
       {
-        time: "04:00 PM to 08:00 PM",
+        time: "04:00 PM - 08:00 PM",
         title: "Wedding Reception",
-        desc: "Hayath Lounge, Kurukathani"
+        desc: "Hayat Lounge Auditorium"
       },
       {
         time: "Followed by",

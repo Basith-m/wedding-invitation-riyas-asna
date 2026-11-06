@@ -1,7 +1,8 @@
-import { useRef, useState, useEffect, useCallback } from 'react';
+import { useRef, useState, useCallback } from 'react';
 
-const HERO_REVEAL_DELAY_MS = 6000;
-const SCROLL_UNLOCK_DELAY_MS = 8000;
+// Timings calibrated for the envelope video
+const HERO_REVEAL_DELAY_MS = 8000; // Text & background reveal at 6s as envelope opens
+const SCROLL_UNLOCK_DELAY_MS = 9000; // Scroll unlocks as the scene stabilizes
 
 export default function HeroSection({ coupleData, onStartInvitation, onUnlockScroll, isLocked }) {
   const videoRef = useRef(null);
@@ -10,6 +11,7 @@ export default function HeroSection({ coupleData, onStartInvitation, onUnlockScr
   const [hasRevealedHero, setHasRevealedHero] = useState(false);
   const [hasUnlockedScroll, setHasUnlockedScroll] = useState(false);
   const [hasCompletedVideo, setHasCompletedVideo] = useState(false);
+  const [isVideoFaded, setIsVideoFaded] = useState(false);
 
   const accumulatedPlaybackMs = useRef(0);
   const playbackSegmentStartTime = useRef(null);
@@ -17,14 +19,18 @@ export default function HeroSection({ coupleData, onStartInvitation, onUnlockScr
   const scrollUnlockTimerId = useRef(null);
   const isStartingRef = useRef(false);
 
+  // 1. Reveal hero text and fade video to show hero-scene.jpg
   const revealHeroText = useCallback(() => {
     setHasRevealedHero(true);
+    setIsVideoFaded(true); // Fades out the video so hero-scene.jpg becomes visible
+
     if (heroRevealTimerId.current) {
       clearTimeout(heroRevealTimerId.current);
       heroRevealTimerId.current = null;
     }
   }, []);
 
+  // 2. Unlock scroll indicator
   const triggerUnlockScroll = useCallback(() => {
     setHasUnlockedScroll(true);
     if (scrollUnlockTimerId.current) {
@@ -34,19 +40,24 @@ export default function HeroSection({ coupleData, onStartInvitation, onUnlockScr
     onUnlockScroll();
   }, [onUnlockScroll]);
 
+  // 3. Finalize on video end
   const onVideoComplete = useCallback(() => {
+    if (hasCompletedVideo) return;
     setHasCompletedVideo(true);
+
     revealHeroText();
     triggerUnlockScroll();
+
     if (videoRef.current) {
       try {
         videoRef.current.pause();
       } catch (_) {}
     }
+
     if (heroSectionRef.current) {
-      heroSectionRef.current.style.backgroundImage = "url('/assets/images/hero-end-frame.jpg')";
+      heroSectionRef.current.style.backgroundImage = "url('/assets/images/hero-scene.png')";
     }
-  }, [revealHeroText, triggerUnlockScroll]);
+  }, [hasCompletedVideo, revealHeroText, triggerUnlockScroll]);
 
   const pausePlaybackTimer = useCallback(() => {
     if (playbackSegmentStartTime.current !== null) {
@@ -67,10 +78,11 @@ export default function HeroSection({ coupleData, onStartInvitation, onUnlockScr
     const video = videoRef.current;
     if (!video) return;
 
-    if (!hasRevealedHero && (video.currentTime >= 6.0 || accumulatedPlaybackMs.current >= HERO_REVEAL_DELAY_MS)) {
+    // Media checks for reveal and unlock
+    if (!hasRevealedHero && (video.currentTime >= 8.0 || accumulatedPlaybackMs.current >= HERO_REVEAL_DELAY_MS)) {
       revealHeroText();
     }
-    if (!hasUnlockedScroll && (video.currentTime >= 8.0 || accumulatedPlaybackMs.current >= SCROLL_UNLOCK_DELAY_MS)) {
+    if (!hasUnlockedScroll && (video.currentTime >= 9.0 || accumulatedPlaybackMs.current >= SCROLL_UNLOCK_DELAY_MS)) {
       triggerUnlockScroll();
     }
 
@@ -78,12 +90,12 @@ export default function HeroSection({ coupleData, onStartInvitation, onUnlockScr
       playbackSegmentStartTime.current = performance.now();
 
       if (!hasRevealedHero) {
-        const remaining = Math.max(0, HERO_REVEAL_DELAY_MS - accumulatedPlaybackMs.current);
-        heroRevealTimerId.current = setTimeout(revealHeroText, remaining);
+        const remainingHero = Math.max(0, HERO_REVEAL_DELAY_MS - accumulatedPlaybackMs.current);
+        heroRevealTimerId.current = setTimeout(revealHeroText, remainingHero);
       }
       if (!hasUnlockedScroll) {
-        const remaining = Math.max(0, SCROLL_UNLOCK_DELAY_MS - accumulatedPlaybackMs.current);
-        scrollUnlockTimerId.current = setTimeout(triggerUnlockScroll, remaining);
+        const remainingScroll = Math.max(0, SCROLL_UNLOCK_DELAY_MS - accumulatedPlaybackMs.current);
+        scrollUnlockTimerId.current = setTimeout(triggerUnlockScroll, remainingScroll);
       }
     }
   }, [hasRevealedHero, hasUnlockedScroll, revealHeroText, triggerUnlockScroll]);
@@ -94,6 +106,11 @@ export default function HeroSection({ coupleData, onStartInvitation, onUnlockScr
 
     accumulatedPlaybackMs.current = 0;
     playbackSegmentStartTime.current = null;
+
+    // Ensure hero-scene.jpg is pre-loaded on background
+    if (heroSectionRef.current) {
+      heroSectionRef.current.style.backgroundImage = "url('/assets/images/hero-scene.png')";
+    }
 
     const video = videoRef.current;
     if (video) {
@@ -137,12 +154,16 @@ export default function HeroSection({ coupleData, onStartInvitation, onUnlockScr
       onClick={handleStart}
       onKeyDown={handleKeyDown}
     >
+      {/* 
+        Video fades out with smooth transition via isVideoFaded, 
+        revealing hero-scene.jpg underneath 
+      */}
       <video
         ref={videoRef}
         id="heroVideo"
-        className="hero-video"
-        src="/assets/video/invitation-open.mp4"
-        poster="/assets/images/hero-poster.jpg"
+        className={`hero-video ${isVideoFaded ? 'fade-out' : ''}`}
+        src="/assets/video/envelope_opening_ra.mp4"
+        poster="/assets/images/envelop_ra.png"
         playsInline
         webkit-playsinline=""
         muted
@@ -157,15 +178,29 @@ export default function HeroSection({ coupleData, onStartInvitation, onUnlockScr
         onTimeUpdate={() => {
           const video = videoRef.current;
           if (!video) return;
-          if (!hasRevealedHero && video.currentTime >= 6.0) revealHeroText();
-          if (!hasUnlockedScroll && video.currentTime >= 8.0) triggerUnlockScroll();
+
+          if (!isVideoFaded && video.currentTime >= 7.5) {
+            setIsVideoFaded(true);
+          }
+
+          // Reveal background & text at 8s
+          if (!hasRevealedHero && video.currentTime >= 8.0) {
+            revealHeroText();
+          }
+
+          // Unlock scroll at 9s
+          if (!hasUnlockedScroll && video.currentTime >= 9.0) {
+            triggerUnlockScroll();
+          }
+
+          // Complete safeguard near end
           if (!hasCompletedVideo && video.duration && video.currentTime >= video.duration - 0.15) {
             onVideoComplete();
           }
         }}
       />
 
-      {/* Couple Identity Overlay (Revealed at 6s) */}
+      {/* Couple Identity Overlay */}
       <div className={`couple-overlay ${hasRevealedHero ? 'revealed' : ''}`}>
         <div className="hero-heart-icon" aria-hidden="true">
           <svg width="26" height="26" viewBox="0 0 24 24" fill="currentColor">
@@ -184,20 +219,23 @@ export default function HeroSection({ coupleData, onStartInvitation, onUnlockScr
         </div>
 
         <h1 className="couple-name">{coupleData.groom.name}</h1>
-        <div className="person-bio" style={{ whiteSpace: 'pre-line' }}>
-          {coupleData.groom.bio}
-        </div>
+        {coupleData.groom.bio && (
+          <div className="person-bio" style={{ whiteSpace: 'pre-line' }}>
+            {coupleData.groom.bio}
+          </div>
+        )}
 
         <p className="couple-ampersand">&amp;</p>
 
         <h1 className="couple-name">{coupleData.bride.name}</h1>
-        <div className="person-bio" style={{ whiteSpace: 'pre-line' }}>
-          {coupleData.bride.bio}
-        </div>
-        
+        {coupleData.bride.bio && (
+          <div className="person-bio" style={{ whiteSpace: 'pre-line' }}>
+            {coupleData.bride.bio}
+          </div>
+        )}
       </div>
 
-      {/* Scroll Down Prompt (Revealed at 8s) */}
+      {/* Scroll Down Prompt */}
       <div
         className={`scroll-indicator ${hasUnlockedScroll ? 'revealed' : ''}`}
         onClick={handleScrollClick}
