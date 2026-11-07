@@ -1,8 +1,8 @@
-import { useRef, useState, useCallback } from 'react';
+import { useRef, useState, useCallback, useEffect } from 'react';
 
 // Timings calibrated for the envelope video
-const HERO_REVEAL_DELAY_MS = 7000; // Text & background reveal at 7s as envelope opens
-const SCROLL_UNLOCK_DELAY_MS = 8000; // Scroll unlocks as the scene stabilizes
+const HERO_REVEAL_DELAY_MS = 7000;
+const SCROLL_UNLOCK_DELAY_MS = 8000;
 
 export default function HeroSection({ coupleData, onStartInvitation, onUnlockScroll, isLocked }) {
   const videoRef = useRef(null);
@@ -19,10 +19,20 @@ export default function HeroSection({ coupleData, onStartInvitation, onUnlockScr
   const scrollUnlockTimerId = useRef(null);
   const isStartingRef = useRef(false);
 
-  // 1. Reveal hero text and fade video to show hero-scene.jpg
+  // Pre-cache hero-scene.png silently in memory so it's ready without lag
+  useEffect(() => {
+    const img = new Image();
+    img.src = '/assets/images/hero-scene.png';
+  }, []);
+
+  // 1. Reveal hero text and fade video to show hero scene
   const revealHeroText = useCallback(() => {
     setHasRevealedHero(true);
-    setIsVideoFaded(true); // Fades out the video so hero-scene.jpg becomes visible
+    setIsVideoFaded(true);
+
+    if (heroSectionRef.current) {
+      heroSectionRef.current.style.backgroundImage = "url('/assets/images/hero-scene.png')";
+    }
 
     if (heroRevealTimerId.current) {
       clearTimeout(heroRevealTimerId.current);
@@ -78,7 +88,6 @@ export default function HeroSection({ coupleData, onStartInvitation, onUnlockScr
     const video = videoRef.current;
     if (!video) return;
 
-    // Media checks for reveal and unlock
     if (!hasRevealedHero && (video.currentTime >= 7.0 || accumulatedPlaybackMs.current >= HERO_REVEAL_DELAY_MS)) {
       revealHeroText();
     }
@@ -107,17 +116,12 @@ export default function HeroSection({ coupleData, onStartInvitation, onUnlockScr
     accumulatedPlaybackMs.current = 0;
     playbackSegmentStartTime.current = null;
 
-    // Ensure hero-scene.jpg is pre-loaded on background
-    if (heroSectionRef.current) {
-      heroSectionRef.current.style.backgroundImage = "url('/assets/images/hero-scene.png')";
-    }
-
     const video = videoRef.current;
     if (video) {
       video.muted = true;
       video.defaultMuted = true;
       video.playsInline = true;
-      video.currentTime = 0;
+      // Do not force currentTime = 0, as it resets the buffer on iOS
       video.play().catch((err) => {
         console.warn('Playback fallback trigger:', err);
         revealHeroText();
@@ -154,10 +158,6 @@ export default function HeroSection({ coupleData, onStartInvitation, onUnlockScr
       onClick={handleStart}
       onKeyDown={handleKeyDown}
     >
-      {/* 
-        Video fades out with smooth transition via isVideoFaded, 
-        revealing hero-scene.jpg underneath 
-      */}
       <video
         ref={videoRef}
         id="heroVideo"
@@ -179,21 +179,22 @@ export default function HeroSection({ coupleData, onStartInvitation, onUnlockScr
           const video = videoRef.current;
           if (!video) return;
 
+          if (video.currentTime >= 5.0 && heroSectionRef.current) {
+            heroSectionRef.current.style.backgroundImage = "url('/assets/images/hero-scene.png')";
+          }
+
           if (!isVideoFaded && video.currentTime >= 5.5) {
             setIsVideoFaded(true);
           }
 
-          // Reveal background & text at 8s
           if (!hasRevealedHero && video.currentTime >= 7.0) {
             revealHeroText();
           }
 
-          // Unlock scroll at 9s
           if (!hasUnlockedScroll && video.currentTime >= 8.0) {
             triggerUnlockScroll();
           }
 
-          // Complete safeguard near end
           if (!hasCompletedVideo && video.duration && video.currentTime >= video.duration - 0.15) {
             onVideoComplete();
           }

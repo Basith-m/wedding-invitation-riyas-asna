@@ -106,7 +106,7 @@ body.locked .invitation-body {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #3b080d url('/assets/images/hero-scene.png') center center / cover no-repeat;
+  background: #3b080d url('/assets/images/envelop_ra.png') center center / cover no-repeat;
   z-index: 10;
   cursor: pointer;
   outline: none;
