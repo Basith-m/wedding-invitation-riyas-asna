@@ -12,6 +12,7 @@ export default function HeroSection({ coupleData, onStartInvitation, onUnlockScr
   const [hasUnlockedScroll, setHasUnlockedScroll] = useState(false);
   const [hasCompletedVideo, setHasCompletedVideo] = useState(false);
   const [isVideoFaded, setIsVideoFaded] = useState(false);
+  const [isVideoPlaying, setIsVideoPlaying] = useState(false);
 
   const accumulatedPlaybackMs = useRef(0);
   const playbackSegmentStartTime = useRef(null);
@@ -109,6 +110,11 @@ export default function HeroSection({ coupleData, onStartInvitation, onUnlockScr
     }
   }, [hasRevealedHero, hasUnlockedScroll, revealHeroText, triggerUnlockScroll]);
 
+  const handleVideoPlaying = () => {
+    setIsVideoPlaying(true);
+    resumePlaybackTimer();
+  };
+
   const handleStart = useCallback(() => {
     if (isStartingRef.current || hasCompletedVideo) return;
     isStartingRef.current = true;
@@ -158,6 +164,12 @@ export default function HeroSection({ coupleData, onStartInvitation, onUnlockScr
       onClick={handleStart}
       onKeyDown={handleKeyDown}
     >
+
+      <div 
+        className={`envelope-poster-cover ${isVideoPlaying ? 'fade-away' : ''}`}
+        aria-hidden="true" 
+      />
+
       <video
         ref={videoRef}
         id="heroVideo"
@@ -170,7 +182,7 @@ export default function HeroSection({ coupleData, onStartInvitation, onUnlockScr
         preload="auto"
         disablePictureInPicture
         controlsList="nodownload noplaybackrate noremoteplayback nofullscreen"
-        onPlaying={resumePlaybackTimer}
+        onPlaying={handleVideoPlaying}
         onPause={pausePlaybackTimer}
         onWaiting={pausePlaybackTimer}
         onStalled={pausePlaybackTimer}
