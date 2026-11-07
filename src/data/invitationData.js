@@ -52,7 +52,7 @@ export const invitationData = {
   venue: {
     title: "Hayath Lounge, Kurukathani",
     sub: "Kurukathani, Malappuram, Kerala",
-    mapEmbedUrl: "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3916.9237097574182!2d75.97635450947743!3d10.96913105556689!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3ba7b3007f48be3b%3A0x2b34c0194fdd201a!2sHAYAT%20Lounge%20Auditorium!5e0!3m2!1sen!2sin!4v1793970717599!5m2!1sen!2sin",
+    mapEmbedUrl: "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d800!2d75.97635450947743!3d10.96913105556689!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3ba7b3007f48be3b%3A0x2b34c0194fdd201a!2sHAYAT%20Lounge%20Auditorium!5e0!3m2!1sen!2sin!4v1793970717599!5m2!1sen!2sin",
     mapLinkUrl: "https://maps.app.goo.gl/8EJNGwbPHuyyHzQRA"
   },
 
