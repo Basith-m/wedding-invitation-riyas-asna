@@ -73,8 +73,8 @@ export const invitationData = {
     tagline: "We can't wait to celebrate with you!",
     credits: {
       lead: "Made with love for couples",
-      authorName: "@tech_byab",
-      authorLink: "https://www.instagram.com/tech_byab/"
+      authorName: "@growza_x",
+      authorLink: "https://www.instagram.com/growza_x/"
     }
   }
 };
