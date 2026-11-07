@@ -1,8 +1,8 @@
 import { useRef, useState, useCallback } from 'react';
 
 // Timings calibrated for the envelope video
-const HERO_REVEAL_DELAY_MS = 8000; // Text & background reveal at 6s as envelope opens
-const SCROLL_UNLOCK_DELAY_MS = 9000; // Scroll unlocks as the scene stabilizes
+const HERO_REVEAL_DELAY_MS = 7000; // Text & background reveal at 7s as envelope opens
+const SCROLL_UNLOCK_DELAY_MS = 8000; // Scroll unlocks as the scene stabilizes
 
 export default function HeroSection({ coupleData, onStartInvitation, onUnlockScroll, isLocked }) {
   const videoRef = useRef(null);
@@ -79,10 +79,10 @@ export default function HeroSection({ coupleData, onStartInvitation, onUnlockScr
     if (!video) return;
 
     // Media checks for reveal and unlock
-    if (!hasRevealedHero && (video.currentTime >= 8.0 || accumulatedPlaybackMs.current >= HERO_REVEAL_DELAY_MS)) {
+    if (!hasRevealedHero && (video.currentTime >= 7.0 || accumulatedPlaybackMs.current >= HERO_REVEAL_DELAY_MS)) {
       revealHeroText();
     }
-    if (!hasUnlockedScroll && (video.currentTime >= 9.0 || accumulatedPlaybackMs.current >= SCROLL_UNLOCK_DELAY_MS)) {
+    if (!hasUnlockedScroll && (video.currentTime >= 8.0 || accumulatedPlaybackMs.current >= SCROLL_UNLOCK_DELAY_MS)) {
       triggerUnlockScroll();
     }
 
@@ -179,17 +179,17 @@ export default function HeroSection({ coupleData, onStartInvitation, onUnlockScr
           const video = videoRef.current;
           if (!video) return;
 
-          if (!isVideoFaded && video.currentTime >= 7.5) {
+          if (!isVideoFaded && video.currentTime >= 5.5) {
             setIsVideoFaded(true);
           }
 
           // Reveal background & text at 8s
-          if (!hasRevealedHero && video.currentTime >= 8.0) {
+          if (!hasRevealedHero && video.currentTime >= 7.0) {
             revealHeroText();
           }
 
           // Unlock scroll at 9s
-          if (!hasUnlockedScroll && video.currentTime >= 9.0) {
+          if (!hasUnlockedScroll && video.currentTime >= 8.0) {
             triggerUnlockScroll();
           }
 

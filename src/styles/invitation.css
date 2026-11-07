@@ -217,7 +217,7 @@ body.locked .invitation-body {
   opacity: 0;
   visibility: hidden;
   transform: translateY(40px);
-  transition: opacity 1.6s cubic-bezier(0.16, 1, 0.3, 1), transform 1.6s cubic-bezier(0.16, 1, 0.3, 1), visibility 0s 1.2s;
+  transition: opacity 2.5s cubic-bezier(0.16, 1, 0.3, 1), transform 2.5s cubic-bezier(0.16, 1, 0.3, 1), visibility 0s 2.5s;
 }
 
 @media (min-width: 768px) {
@@ -230,7 +230,7 @@ body.locked .invitation-body {
   opacity: 1;
   visibility: visible;
   transform: translateY(0);
-  transition: opacity 1.6s cubic-bezier(0.16, 1, 0.3, 1), transform 1.6s cubic-bezier(0.16, 1, 0.3, 1), visibility 0s 0s;
+  transition: opacity 2.5s cubic-bezier(0.16, 1, 0.3, 1), transform 2.5s cubic-bezier(0.16, 1, 0.3, 1), visibility 0s 0s;
 }
 
 .hero-heart-icon {
