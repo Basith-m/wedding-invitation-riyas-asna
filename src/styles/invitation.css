@@ -342,13 +342,14 @@ body.locked .invitation-body {
   font-size: 0.75rem;
   text-transform: uppercase;
   letter-spacing: 0.25em;
-  color: var(--primary);
-  text-shadow: 0 1px 6px rgba(255, 255, 255, 0.8);
+  color: #fff8eb;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.75), 0 1px 3px rgba(60, 10, 15, 0.9);
   font-weight: 600;
 }
 
 .scroll-indicator svg {
-  color: var(--primary);
+  color: #fff8eb;
+  filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.75));
 }
 
 @keyframes bounceScroll {
