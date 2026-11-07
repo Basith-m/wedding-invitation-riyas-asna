@@ -2,7 +2,7 @@ export const invitationData = {
   couple: {
     intro: "We're getting married",
     groom: {
-      name: "Muhammed Riyas",
+      name: "Mohamed Riyas",
       bio: "S/O Husain \n & \n Safiya"
     },
     bride: {
