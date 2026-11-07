@@ -15,14 +15,24 @@ function ScratchCard({ value, label, isMonth = false }) {
     const w = canvas.width;
     const h = canvas.height;
 
-    // Draw initial dark olive surface
+    // Draw scratch coating with an elegant watermark hint
     ctx.save();
     ctx.clearRect(0, 0, w, h);
     ctx.beginPath();
     ctx.arc(w / 2, h / 2, w / 2, 0, Math.PI * 2);
     ctx.clip();
+    
+    // Base coating
     ctx.fillStyle = '#72141F';
     ctx.fillRect(0, 0, w, h);
+
+    // ✨ Faint Gold "Scratch Me" Watermark hint
+    ctx.fillStyle = 'rgba(235, 213, 183, 0.55)';
+    ctx.font = '600 24px system-ui, -apple-system, sans-serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText('✦ SCRATCH ✦', w / 2, h / 2);
+
     ctx.restore();
 
     const getCoords = (clientX, clientY) => {
@@ -38,8 +48,8 @@ function ScratchCard({ value, label, isMonth = false }) {
       try {
         const imageData = ctx.getImageData(0, 0, w, h);
         const data = imageData.data;
-        let transparentInsideCircle = 0;
-        let totalSampledInsideCircle = 0;
+        let transparent = 0;
+        let total = 0;
         const stride = 16;
         const cx = w / 2;
         const cy = h / 2;
@@ -52,19 +62,14 @@ function ScratchCard({ value, label, isMonth = false }) {
           const dx = px - cx;
           const dy = py - cy;
           if (dx * dx + dy * dy <= rSq) {
-            totalSampledInsideCircle++;
-            if (data[i] === 0) {
-              transparentInsideCircle++;
-            }
+            total++;
+            if (data[i] === 0) transparent++;
           }
         }
 
-        if (totalSampledInsideCircle > 0) {
-          const percent = (transparentInsideCircle / totalSampledInsideCircle) * 100;
-          if (percent >= 50) {
-            isRevealedRef.current = true;
-            setRevealed(true);
-          }
+        if (total > 0 && (transparent / total) * 100 >= 40) {
+          isRevealedRef.current = true;
+          setRevealed(true);
         }
       } catch (_) {}
     };
@@ -77,28 +82,27 @@ function ScratchCard({ value, label, isMonth = false }) {
         ctx.beginPath();
         ctx.moveTo(prev.x, prev.y);
         ctx.lineTo(x, y);
-        ctx.lineWidth = 48;
+        ctx.lineWidth = 52;
         ctx.lineCap = 'round';
         ctx.lineJoin = 'round';
         ctx.stroke();
       }
       ctx.beginPath();
-      ctx.arc(x, y, 24, 0, Math.PI * 2);
+      ctx.arc(x, y, 28, 0, Math.PI * 2);
       ctx.fill();
 
       scratchesCountRef.current++;
-      if (scratchesCountRef.current % 10 === 0) {
+      if (scratchesCountRef.current % 6 === 0) {
         checkClearedPercent();
       }
     };
 
     const handlePointerDown = (e) => {
       e.preventDefault();
-      try {
-        canvas.setPointerCapture(e.pointerId);
-      } catch (_) {}
+      try { canvas.setPointerCapture(e.pointerId); } catch (_) {}
       isDrawingRef.current = true;
       lastPointRef.current = getCoords(e.clientX, e.clientY);
+      // Immediate circle scratch on initial touch
       scratch(lastPointRef.current.x, lastPointRef.current.y, null);
     };
 
@@ -115,21 +119,32 @@ function ScratchCard({ value, label, isMonth = false }) {
       isDrawingRef.current = false;
       lastPointRef.current = null;
       checkClearedPercent();
-      try {
-        canvas.releasePointerCapture(e.pointerId);
-      } catch (_) {}
+      try { canvas.releasePointerCapture(e.pointerId); } catch (_) {}
+    };
+
+    // Single Tap helper for guests who only click
+    const handleClick = (e) => {
+      if (isRevealedRef.current) return;
+      const pt = getCoords(e.clientX, e.clientY);
+      scratch(pt.x, pt.y, null);
+      // Also scratch adjacent points to instantly expose number
+      scratch(pt.x + 20, pt.y + 20, null);
+      scratch(pt.x - 20, pt.y - 20, null);
+      checkClearedPercent();
     };
 
     canvas.addEventListener('pointerdown', handlePointerDown);
     canvas.addEventListener('pointermove', handlePointerMove);
     canvas.addEventListener('pointerup', handlePointerEnd);
     canvas.addEventListener('pointercancel', handlePointerEnd);
+    canvas.addEventListener('click', handleClick);
 
     return () => {
       canvas.removeEventListener('pointerdown', handlePointerDown);
       canvas.removeEventListener('pointermove', handlePointerMove);
       canvas.removeEventListener('pointerup', handlePointerEnd);
       canvas.removeEventListener('pointercancel', handlePointerEnd);
+      canvas.removeEventListener('click', handleClick);
     };
   }, []);
 
